@@ -14,3 +14,9 @@ $ nvcc queen.cu -o queen -arch=sm_21 CUDA.cu
 Then run it
 
 $ ./queen
+
+
+Alternatively
+
+$ gcc queen.c -o queen -lm
+$ ./queen
