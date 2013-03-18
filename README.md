@@ -9,14 +9,14 @@ How to use
 
 Compile (you need to install the CUDA Toolkit first)
 
-$ nvcc queen.cu -o queen -arch=sm_21 CUDA.cu
+>$ nvcc queen.cu -o queen -arch=sm_21 CUDA.cu
 
 Then run it
 
-$ ./queen
+>$ ./queen
 
 
 Alternatively
 
-$ gcc queen.c -o queen -lm
-$ ./queen
+>$ gcc queen.c -o queen -lm
+>$ ./queen
