@@ -3,7 +3,7 @@
 #define QUEENS 10
 
 __device__
-void kiir(char *A, int *db)
+void kiir(char *A)
 {
     char s[QUEENS*21 + 1];
     int k = 0;
@@ -24,17 +24,36 @@ void kiir(char *A, int *db)
 
     s[k] = '\0';
 
-    atomicAdd(db, 1);
-    printf("%d.\n%s\n", *db, s);
+    printf("%s\n", s);
 }
 
 __global__
 void queen(int *db, const int n)
 {
+    {
+	bool B[QUEENS];
+	
+	for(int i = 0; i < QUEENS; i++)
+	    B[i] = 0;
+	
+	B[threadIdx.x] = 1;
+	B[threadIdx.y] = 1;
+	B[threadIdx.z] = 1;
+	B[blockIdx.x/10] = 1;
+	B[blockIdx.x%10] = 1;
+	B[blockIdx.y/10] = 1;
+	B[blockIdx.y%10] = 1;
+	B[blockIdx.z/10] = 1;
+	B[blockIdx.z%10] = 1;
+	B[n] = 1;
+	
+	for(int i = 0; i < QUEENS; i++)
+	    if(B[i] == 0)
+		return;
+    }
+    
     char A[QUEENS];
     
-    __syncthreads();
-
     A[0] = threadIdx.x;
     A[1] = threadIdx.y;
     A[2] = threadIdx.z;
@@ -45,26 +64,15 @@ void queen(int *db, const int n)
     A[7] = blockIdx.z/10;
     A[8] = blockIdx.z%10;
     A[9] = n;
-    
-    {
-	bool B[QUEENS];
-	
-	for(int i = 0; i < QUEENS; i++)
-	    B[i] = 0;
-	
-	for(int i = 0; i < QUEENS; i++)
-	    if(!B[A[i]])
-		B[A[i]] = 1;
-	    else
-		return;
-    }
 
     for(int i = 0; i < QUEENS - 1; i++)
         for(int j = i + 1; j < QUEENS; j++)
             if(abs(i - j) == abs(A[i] - A[j]))
                 return;
-    
-    kiir(A, db);
+	    
+    atomicAdd(db, 1);
+    printf("%d.\n", *db);
+    kiir(A);
 }
 
 int
@@ -91,7 +99,7 @@ main()
         return -1;
     }
 
-    printf("Solutions: %d\n", h);
+    fprintf(stderr, "Solutions: %d\n", h);
 
     fprintf(stderr, "\nDone\n");
     return 0;
